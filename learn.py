@@ -8,11 +8,14 @@ import numpy as np
 def sentence_to_graph(sentence, families):
     graph = {0: {}}
     for key in sentence.keys():
-        graph[key] = {}
-        graph[0][key] = get_edge_features(sentence[key], root_word, families)
+        if key != 0:
+            graph[key] = {}
+            graph[0][key] = get_edge_features(sentence[key], root_word, families)
 
     for child in sentence.keys():
         for parent in sentence.keys():
+            if child == parent or child == 0 or parent == 0:
+                continue
             graph[parent][child] = get_edge_features(sentence[child], sentence[parent], families)
 
     return graph
@@ -49,7 +52,7 @@ def get_weighted_graph(graph, vec):
 def compare_labels_to_graph(sentence, graph):
 
     for key, word in sentence.items():
-        if word.parent not in graph or key not in graph[word.parent]:
+        if key != 0 and (word.parent not in graph or key not in graph[word.parent]):
             return False
 
     return True
@@ -58,12 +61,13 @@ def compare_labels_to_graph(sentence, graph):
 def perceptron(file_path, n, families):
     start_time = time.time()
     sentences = parse_input_file(file_path)
-    graphs = map(lambda sentence: (sentence, sentence_to_features(sentence, families), sentence_to_graph(sentence, families)), \
-                 sentences)
+    graphs = list(map(lambda sentence: (sentence, sentence_to_features(sentence, families), sentence_to_graph(sentence, families)), \
+                 sentences))
     vec = np.zeros(total_feature_num(families))
     print("%d sentences\n" % len(sentences))
 
     res_file = open("vector.py", 'w')
+    res_file.write("vec = {}\n\n")
 
     for i in range(0, n):
         print("enter %d iteration at %f" % (i, time.time() - start_time))
@@ -81,4 +85,4 @@ def perceptron(file_path, n, families):
     return vec
 
 if __name__ == "__main__":
-    perceptron("train.labeled", 5, [1, 2, 3, 4, 5, 6, 8, 10, 13])
+    perceptron("train.labeled", 10, [1, 2, 3, 4, 5, 6, 8, 10, 13])
