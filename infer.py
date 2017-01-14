@@ -33,4 +33,4 @@ def infer(file_path, families):
 
 
 if __name__ == "__main__":
-    infer("test.labeled", [1, 2, 3, 4, 5, 6, 8, 10, 13, 14, 15, 16])
+    infer("test.labeled", [1, 2, 3, 4, 5, 6, 8, 10, 13, 15, 16, 17, 18])

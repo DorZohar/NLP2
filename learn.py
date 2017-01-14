@@ -10,13 +10,13 @@ def sentence_to_graph(sentence, families):
     for key in sentence.keys():
         if key != 0:
             graph[key] = {}
-            graph[0][key] = get_edge_features(sentence[key], root_word, families)
+            graph[0][key] = get_edge_features(sentence[key], root_word, sentence, families)
 
     for child in sentence.keys():
         for parent in sentence.keys():
             if child == parent or child == 0 or parent == 0:
                 continue
-            graph[parent][child] = get_edge_features(sentence[child], sentence[parent], families)
+            graph[parent][child] = get_edge_features(sentence[child], sentence[parent], sentence, families)
 
     return graph
 
@@ -27,7 +27,7 @@ def sentence_to_features(sentence, families):
     for idx, word in sentence.items():
         if idx == 0:
             continue
-        features += get_edge_features(word, sentence[word.parent], families)
+        features += get_edge_features(word, sentence[word.parent], sentence, families)
 
     return features
 
@@ -36,7 +36,7 @@ def graph_to_features(graph, sentence, families):
     features = []
     for vertex, edges in graph.items():
         for neigh in edges:
-            features += get_edge_features(sentence[neigh], sentence[vertex], families)
+            features += get_edge_features(sentence[neigh], sentence[vertex], sentence, families)
 
     return features
 
@@ -87,4 +87,4 @@ def perceptron(file_path, n, families):
     return vec
 
 if __name__ == "__main__":
-    perceptron("train.labeled", 5, [1, 2, 3, 4, 5, 6, 8, 10, 13, 14, 15, 16])
+    perceptron("train.labeled", 5, [1, 2, 3, 4, 5, 6, 8, 10, 13, 15, 16, 17, 18])

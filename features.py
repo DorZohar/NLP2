@@ -11,7 +11,7 @@ class Word:
 
 
 root_word = Word("0\tROOT\t_\tROOT\t_\t_\t-1\tROOT\t_\t_")
-max_arc_length = 5
+max_arc_length = 10
 
 class Feature:
     def __init__(self, family_id, func):
@@ -22,8 +22,8 @@ class Feature:
         else:
             self.keys_dict = {}
 
-    def get_indices(self, cword, pword, offset):
-        return [self.keys_dict[key] + offset for key in self.func(cword, pword) if key in self.keys_dict]
+    def get_indices(self, cword, pword, sentence, offset):
+        return [self.keys_dict[key] + offset for key in self.func(cword, pword, sentence) if key in self.keys_dict]
 
     def create_indices(self, sentences):
 
@@ -33,7 +33,7 @@ class Feature:
             for word in sentence.values():
                 if word.idx == 0:
                     continue
-                for item in self.func(word, sentence[word.parent]):
+                for item in self.func(word, sentence[word.parent], sentence):
                     possible_values_set.add(item)
 
         possible_values_list = list(possible_values_set)
@@ -48,24 +48,30 @@ class Feature:
 
 
 feature_families = [
-    Feature(0, lambda cword, pword: [None]),
-    Feature(1, lambda cword, pword: [(pword.word, pword.pos)]),
-    Feature(2, lambda cword, pword: [pword.word]),
-    Feature(3, lambda cword, pword: [pword.pos]),
-    Feature(4, lambda cword, pword: [(cword.word, cword.pos)]),
-    Feature(5, lambda cword, pword: [cword.word]),
-    Feature(6, lambda cword, pword: [cword.pos]),
-    Feature(7, lambda cword, pword: [(pword.word, pword.pos, cword.word, cword.pos)]),
-    Feature(8, lambda cword, pword: [(pword.pos, cword.word, cword.pos)]),
-    Feature(9, lambda cword, pword: [(pword.word, cword.word, cword.pos)]),
-    Feature(10, lambda cword, pword: [(pword.word, pword.pos, cword.pos)]),
-    Feature(11, lambda cword, pword: [(pword.word, pword.pos, cword.word)]),
-    Feature(12, lambda cword, pword: [(pword.word, cword.word)]),
-    Feature(13, lambda cword, pword: [(pword.pos, cword.pos)]),
-    Feature(14, lambda cword, pword: [(pword.pos, cword.pos)] if abs(pword.idx - cword.idx) < max_arc_length else []),
-    Feature(15, lambda cword, pword: [(pword.pos, cword.pos)] if pword.idx > cword.idx else []),
-    Feature(16, lambda cword, pword: [(pword.pos, cword.pos)] if pword.idx < cword.idx else []),
-
+    Feature(0, lambda cword, pword, sentence: [None]),
+    Feature(1, lambda cword, pword, sentence: [(pword.word, pword.pos)]),
+    Feature(2, lambda cword, pword, sentence: [pword.word]),
+    Feature(3, lambda cword, pword, sentence: [pword.pos]),
+    Feature(4, lambda cword, pword, sentence: [(cword.word, cword.pos)]),
+    Feature(5, lambda cword, pword, sentence: [cword.word]),
+    Feature(6, lambda cword, pword, sentence: [cword.pos]),
+    Feature(7, lambda cword, pword, sentence: [(pword.word, pword.pos, cword.word, cword.pos)]),
+    Feature(8, lambda cword, pword, sentence: [(pword.pos, cword.word, cword.pos)]),
+    Feature(9, lambda cword, pword, sentence: [(pword.word, cword.word, cword.pos)]),
+    Feature(10, lambda cword, pword, sentence: [(pword.word, pword.pos, cword.pos)]),
+    Feature(11, lambda cword, pword, sentence: [(pword.word, pword.pos, cword.word)]),
+    Feature(12, lambda cword, pword, sentence: [(pword.word, cword.word)]),
+    Feature(13, lambda cword, pword, sentence: [(pword.pos, cword.pos)]),
+    Feature(14, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos)] if abs(pword.idx - cword.idx) < max_arc_length else []),
+    Feature(15, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos)] if pword.idx > cword.idx else []),
+    Feature(16, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos)] if pword.idx < cword.idx else []),
+    Feature(17, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos, sentence[i].pos) for i in range(min(pword.idx, cword.idx)+1, max(pword.idx, cword.idx))]),
+    Feature(18, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos, abs(pword.idx - cword.idx))] if abs(pword.idx - cword.idx) < max_arc_length else [(pword.pos, cword.pos, 0)]),
 ]
 
 
@@ -103,11 +109,11 @@ def create_feature_indices(file_path):
     file.close()
 
 
-def get_edge_features(cword, pword, families):
+def get_edge_features(cword, pword, sentence, families):
     offset = 0
     indices = []
     for family in families:
-        indices += feature_families[family].get_indices(cword, pword, offset)
+        indices += feature_families[family].get_indices(cword, pword, sentence, offset)
         offset += len(feature_families[family].keys_dict)
 
     return indices
