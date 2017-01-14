@@ -17,7 +17,7 @@ def get_inference_accuracy(sentence_and_tree):
 
 
 def infer(file_path, families):
-    sentences = parse_input_file(file_path)
+    sentences = parse_input_file(file_path)[1:-1]
     word_num = sum([len(sentence) for sentence in sentences])
     graphs = map(lambda sentence: sentence_to_graph(sentence, families), sentences)
     selected_vec = np.asarray(vec[len(vec) - 1])
@@ -31,4 +31,4 @@ def infer(file_path, families):
 
 
 if __name__ == "__main__":
-    infer("train.labeled", [1, 2, 3, 4, 5, 6, 8, 10, 13])
+    infer("test.labeled", [1, 2, 3, 4, 5, 6, 8, 10, 13, 14, 15, 16])

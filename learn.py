@@ -87,4 +87,4 @@ def perceptron(file_path, n, families):
     return vec
 
 if __name__ == "__main__":
-    perceptron("train.labeled", 5, [1, 2, 3, 4, 5, 6, 8, 10, 13])
+    perceptron("train.labeled", 5, [1, 2, 3, 4, 5, 6, 8, 10, 13, 14, 15, 16])

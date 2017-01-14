@@ -11,13 +11,16 @@ class Word:
 
 
 root_word = Word("0\tROOT\t_\tROOT\t_\t_\t-1\tROOT\t_\t_")
-
+max_arc_length = 5
 
 class Feature:
     def __init__(self, family_id, func):
         self.family_id = family_id
         self.func = func
-        self.keys_dict = family_indices[family_id]
+        if family_id in family_indices:
+            self.keys_dict = family_indices[family_id]
+        else:
+            self.keys_dict = {}
 
     def get_indices(self, cword, pword, offset):
         return [self.keys_dict[key] + offset for key in self.func(cword, pword) if key in self.keys_dict]
@@ -30,7 +33,8 @@ class Feature:
             for word in sentence.values():
                 if word.idx == 0:
                     continue
-                possible_values_set.add(self.func(word, sentence[word.parent]))
+                for item in self.func(word, sentence[word.parent]):
+                    possible_values_set.add(item)
 
         possible_values_list = list(possible_values_set)
         possible_values_list.sort()
@@ -58,6 +62,9 @@ feature_families = [
     Feature(11, lambda cword, pword: [(pword.word, pword.pos, cword.word)]),
     Feature(12, lambda cword, pword: [(pword.word, cword.word)]),
     Feature(13, lambda cword, pword: [(pword.pos, cword.pos)]),
+    Feature(14, lambda cword, pword: [(pword.pos, cword.pos)] if abs(pword.idx - cword.idx) < max_arc_length else []),
+    Feature(15, lambda cword, pword: [(pword.pos, cword.pos)] if pword.idx > cword.idx else []),
+    Feature(16, lambda cword, pword: [(pword.pos, cword.pos)] if pword.idx < cword.idx else []),
 
 ]
 
@@ -114,5 +121,5 @@ def total_feature_num(families):
     return num
 
 
-#if __name__ == "__main__":
-    #create_feature_indices('train.labeled')
+if __name__ == "__main__":
+    create_feature_indices('train.labeled')
