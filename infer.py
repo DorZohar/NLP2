@@ -20,7 +20,8 @@ def infer(file_path, families):
     sentences = parse_input_file(file_path)
     word_num = sum([len(sentence) for sentence in sentences])
     graphs = map(lambda sentence: sentence_to_graph(sentence, families), sentences)
-    weighted_graphs = map(lambda graph: get_weighted_graph(graph, np.asarray(vec[len(vec) - 1])), graphs)
+    selected_vec = np.asarray(vec[len(vec) - 1])
+    weighted_graphs = list(map(lambda graph: get_weighted_graph(graph, selected_vec), graphs))
     msts = map(lambda wgraph: mst(0, wgraph), weighted_graphs)
     accuracies = map(get_inference_accuracy, zip(sentences, msts))
 

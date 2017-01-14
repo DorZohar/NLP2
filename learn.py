@@ -76,8 +76,10 @@ def perceptron(file_path, n, families):
             graph_mst = mst(0, weighted_graph)
             if not compare_labels_to_graph(sentence, graph_mst):
                 graph_features = graph_to_features(graph_mst, sentence, families)
-                vec[features] += 1
-                vec[graph_features] -= 1
+                for feature in features:
+                    vec[feature] += 1
+                for feature in graph_features:
+                    vec[feature] -= 1
         res_file.write("vec[%d] = %s\n" % (i, vec.tolist()))
 
 
@@ -85,4 +87,4 @@ def perceptron(file_path, n, families):
     return vec
 
 if __name__ == "__main__":
-    perceptron("train.labeled", 10, [1, 2, 3, 4, 5, 6, 8, 10, 13])
+    perceptron("train.labeled", 5, [1, 2, 3, 4, 5, 6, 8, 10, 13])
