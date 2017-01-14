@@ -78,7 +78,7 @@ def parse_input_file(file_path):
     sentence = {}
 
     for line in lines:
-        if line == "\n":
+        if line == "\n" or line=="\r\n":
             sentences.append(sentence)
             sentence = {}
         else:
