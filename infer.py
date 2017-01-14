@@ -25,7 +25,7 @@ def infer(file_path, families):
     msts = map(lambda wgraph: mst(0, wgraph), weighted_graphs)
     accuracies = map(get_inference_accuracy, zip(sentences, msts))
 
-    total_acc = sum(list(accuracies)) / word_num
+    total_acc = sum(list(accuracies)) / float(word_num)
     print(total_acc)
 
 

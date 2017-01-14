@@ -117,9 +117,10 @@ def contract_cycle(G, cycle):
                     if weight < min_weight:
                         min_weight = weight
                         min_dst = dst
-            if src not in contracted_G:
-                contracted_G[src] = {}
-            contracted_G[src][min_dst] = min_weight + s_cycle
+            if min_dst != -1:
+                if src not in contracted_G:
+                    contracted_G[src] = {}
+                contracted_G[src][min_dst] = min_weight + s_cycle
 
     # add the mst of the cycle
     for src in cycle_graph:
