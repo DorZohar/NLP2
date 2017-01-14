@@ -72,6 +72,10 @@ feature_families = [
         [(pword.pos, cword.pos, sentence[i].pos) for i in range(min(pword.idx, cword.idx)+1, max(pword.idx, cword.idx))]),
     Feature(18, lambda cword, pword, sentence:
         [(pword.pos, cword.pos, abs(pword.idx - cword.idx))] if abs(pword.idx - cword.idx) < max_arc_length else [(pword.pos, cword.pos, 0)]),
+    Feature(19, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos, sentence[pword.idx - 1].pos, sentence[cword.idx - 1].pos)] if pword.idx > 1 and cword.idx > 1 else []),
+    Feature(20, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos, sentence[pword.idx + 1].pos, sentence[cword.idx + 1].pos)] if pword.idx < len(sentence) - 1 and cword.idx < len(sentence) - 1 else []),
 ]
 
 
