@@ -1,6 +1,6 @@
 import numpy as np
-
-from chu_liu import mst
+import time
+from CLE import mst
 from features import parse_input_file
 from learn import sentence_to_graph, get_weighted_graph
 from vector import vec
@@ -17,7 +17,8 @@ def get_inference_accuracy(sentence_and_tree):
 
 
 def infer(file_path, families):
-    sentences = parse_input_file(file_path)[1:-1]
+    start_time = time.time()
+    sentences = parse_input_file(file_path)
     word_num = sum([len(sentence) for sentence in sentences])
     graphs = map(lambda sentence: sentence_to_graph(sentence, families), sentences)
     selected_vec = np.asarray(vec[len(vec) - 1])
@@ -26,7 +27,8 @@ def infer(file_path, families):
     accuracies = map(get_inference_accuracy, zip(sentences, msts))
 
     total_acc = sum(list(accuracies)) / float(word_num)
-    print(total_acc)
+    print("accuracy: " + str(total_acc*100) + "%")
+    print("time: " + str(time.time()-start_time) + " seconds")
 
 
 
