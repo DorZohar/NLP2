@@ -58,6 +58,15 @@ def compare_labels_to_graph(sentence, graph):
     return True
 
 
+def mst_wrapper(root, graph):
+    true_root = min(graph[0], key = graph[0].get)
+    root_value = graph[0][true_root]
+    del graph[0]
+    mst_tree = mst(true_root, graph)
+    mst_tree[0] = {true_root: root_value}
+    return mst_tree
+
+
 def perceptron(file_path, n, families):
     start_time = time.time()
     sentences = parse_input_file(file_path)
@@ -73,7 +82,7 @@ def perceptron(file_path, n, families):
         print("enter %d iteration at %f" % (i, time.time() - start_time))
         for sentence, features, graph in graphs:
             weighted_graph = get_weighted_graph(graph, vec)
-            graph_mst = mst(0, weighted_graph)
+            graph_mst = mst_wrapper(0, weighted_graph)
             if not compare_labels_to_graph(sentence, graph_mst):
                 graph_features = graph_to_features(graph_mst, sentence, families)
                 for feature in features:
@@ -87,4 +96,4 @@ def perceptron(file_path, n, families):
     return vec
 
 if __name__ == "__main__":
-    perceptron("train.labeled", 5, [1, 2, 3, 4, 5, 6, 8, 10, 13, 15, 16, 17, 18])
+    perceptron("train.labeled", 5, [1, 2, 3, 4, 5, 6, 8, 10, 13, 15, 16, 17, 18, 19, 20])

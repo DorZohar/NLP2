@@ -57,7 +57,7 @@ def _getCycle(n, g, visited=set(), cycle=[]):
 def _mergeCycles(cycle, G, RG, g, rg):
     allInEdges = []
     minInternal = None
-    minInternalWeight = sys.maxsize
+    minInternalWeight = float("inf")
 
     # find minimal internal edge weight
     for n in cycle:
