@@ -3,7 +3,54 @@ import time
 from chu_liu import mst
 from features import parse_input_file
 from learn import sentence_to_graph, get_weighted_graph, perceptron, vector_location
+from CLE import plot
+import argparse
+import imp
 #from vector import vec
+
+
+def get_fails(sentences, msts, save_path, num_fails=10):
+    count = 0
+
+    fails = []
+    for sentence, tree in zip(sentences, msts):
+
+        # get fails and gold
+        sentence_fails = {}
+        gold_tree = {}
+        gold_tree_verbal = {}
+        for key, word in sentence.items():
+            # tree with words
+            if word.parent == 0:
+                parent_word = 'root'
+            else:
+                parent_word = sentence[word.parent].word
+            if parent_word not in gold_tree_verbal:
+                gold_tree_verbal[parent_word] = {}
+            gold_tree_verbal[parent_word][word.word] = 1
+            # tree with indices
+            if word.parent not in gold_tree:
+                gold_tree[word.parent] = {}
+            gold_tree[word.parent][key] = 1
+
+            if word.parent in tree and key in tree[word.parent]:
+                pass
+            else:
+                sentence_fails[word.parent] = key
+
+        fails += [sentence_fails]
+
+        # plot result and gold
+        if sentence_fails != {}:
+            plot(tree, save_path + '/' + str(count))
+            plot(gold_tree, save_path + '/' + str(count) + '_gold')
+            plot(gold_tree_verbal, save_path + '/' + str(count) + '_gold_verbal')
+
+            count += 1
+        if count >= num_fails:
+            break
+
+    return fails
 
 
 def get_inference_accuracy(sentence_and_tree):
@@ -16,7 +63,18 @@ def get_inference_accuracy(sentence_and_tree):
     return sum
 
 
-def infer(file_path, families, vector):
+def infer_only(file_path, families, plot_fails=False, iter=-1):
+    if iter == -1:
+        iter = [20, 50, 80, 100]
+    else:
+        iter = [iter]
+    for num_iter in iter:
+        print("num iterations: " + str(num_iter))
+        module = imp.load_source('vector', vector_location(families) + '/vector_' + str(num_iter) + '.py')
+        infer(file_path, families, module.vec, plot_fails)
+
+
+def infer(file_path, families, vector, plot_fails=False):
     start_time = time.time()
     sentences = parse_input_file(file_path)
     word_num = sum([len(sentence) for sentence in sentences])
@@ -25,12 +83,13 @@ def infer(file_path, families, vector):
     weighted_graphs = list(map(lambda graph: get_weighted_graph(graph, selected_vec), graphs))
     msts = map(lambda wgraph: mst(0, wgraph), weighted_graphs)
     accuracies = map(get_inference_accuracy, zip(sentences, msts))
+    if plot_fails:
+        get_fails(sentences, msts, vector_location(families))
 
     total_acc = sum(list(accuracies)) / float(word_num)
     print("accuracy: " + str(total_acc*100) + "%")
     print("time: " + str(time.time()-start_time) + " seconds")
     return total_acc, time.time()-start_time
-
 
 
 def train_and_infer(file_name, families, iterations = [20, 50, 80, 100]):
@@ -46,7 +105,16 @@ def train_and_infer(file_name, families, iterations = [20, 50, 80, 100]):
             file.write("%d,%f,%f\n" % (i, 100*res[0], res[1]))
 
 
-
 if __name__ == "__main__":
-#    infer("test.labeled", [1, 2, 3, 4, 5, 6, 8, 10, 13, 15, 16, 17, 18, 19, 20])
-    train_and_infer("train.labeled", [1, 2, 3, 4, 5, 6, 8, 10, 13])
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--infer', action='store_true')
+    parser.add_argument('-p', '--plot_fails', action='store_true')
+    parser.add_argument('-it', '--iter', default=-1, type=int)
+    args = parser.parse_args()
+
+    families = [8,10,11,12,13,14,16,17,18,19,20]
+    print('families: ' + ','.join([str(f) for f in families]))
+    if args.infer:
+        infer_only("test.labeled", families, args.plot_fails, args.iter)
+    else:
+        train_and_infer("train.labeled", families)
