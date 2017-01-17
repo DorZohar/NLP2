@@ -122,6 +122,11 @@ feature_families = [
         [(pword.pos, cword.pos)] if abs(pword.idx - cword.idx) < 8 else []),
     Feature(43, lambda cword, pword, sentence:
         [(pword.pos, cword.pos)] if abs(pword.idx - cword.idx) < 16 else []),
+    Feature(44, lambda cword, pword, sentence:
+    [(pword.pos, cword.pos, sentence[pword.idx - 1].pos, sentence[cword.idx + 1].pos)] if pword.idx > 1 and cword.idx < len(sentence) - 1 else []),
+    Feature(45, lambda cword, pword, sentence:
+    [(pword.pos, cword.pos, sentence[pword.idx + 1].pos, sentence[cword.idx - 1].pos)] if pword.idx < len(sentence) - 1 and cword.idx > 1 else []),
+
 ]
 
 
@@ -154,6 +159,7 @@ def create_feature_indices(file_path):
     file.write("family_indices = {}\n\n")
     for feat in feature_families:
         indices = feat.create_indices(sentences)
+        print(feat.family_id)
         file.write("family_indices[%d] = %s\n" % (feat.family_id, indices))
 
     file.close()
