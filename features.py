@@ -88,6 +88,22 @@ feature_families = [
         [(pword.pos, cword.pos, sentence[cword.idx + 1].pos)] if cword.idx < len(sentence) - 1 else []),
     Feature(26, lambda cword, pword, sentence:
         [(pword.pos, cword.pos, sentence[pword.idx + 1].pos)] if pword.idx < len(sentence) - 1 else []),
+    Feature(27, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos, sentence[pword.idx - 1].pos, sentence[pword.idx + 1].pos)] if pword.idx < len(sentence) - 1 and pword.idx > 1 else []),
+    Feature(28, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos, sentence[cword.idx - 1].pos, sentence[cword.idx + 1].pos)] if cword.idx < len(sentence) - 1 and cword.idx > 1 else []),
+    Feature(29, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos, sentence[cword.idx - 1].word, sentence[cword.idx + 1].word)] if cword.idx < len(sentence) - 1 and cword.idx > 1 else []),
+    Feature(30, lambda cword, pword, sentence:
+        [(cword.word, sentence[cword.idx - 1].pos, sentence[cword.idx + 1].pos)] if cword.idx < len(sentence) - 1 and cword.idx > 1 else []),
+    Feature(31, lambda cword, pword, sentence:
+        [(cword.word, sentence[pword.idx - 1].pos, sentence[pword.idx + 1].pos)] if pword.idx < len(sentence) - 1 and pword.idx > 1 else []),
+    Feature(32, lambda cword, pword, sentence:
+        [(cword.pos, sentence[cword.idx - 1].pos, sentence[cword.idx + 1].pos)] if cword.idx < len(sentence) - 1 and cword.idx > 1 else []),
+    Feature(33, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos, sentence[cword.idx - 2].pos, sentence[cword.idx + 2].pos)] if cword.idx < len(sentence) - 2 and cword.idx > 2 else []),
+    Feature(34, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos, sentence[cword.idx - 2].word, sentence[cword.idx + 2].word)] if cword.idx < len(sentence) - 2 and cword.idx > 2 else []),
 
 ]
 
