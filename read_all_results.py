@@ -7,7 +7,7 @@ dirs = [d[0] for d in list(os.walk('vectors'))][1:]
 new_dirs = []
 for idx, d in enumerate(dirs):
     if not os.path.exists(d + '/results.csv'):
-      del(dirs[idx])
+      #del(dirs[idx])
       continue
     new_dirs += [d]
     with open(d + '/results.csv') as f:

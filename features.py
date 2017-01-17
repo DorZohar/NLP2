@@ -104,7 +104,24 @@ feature_families = [
         [(pword.pos, cword.pos, sentence[cword.idx - 2].pos, sentence[cword.idx + 2].pos)] if cword.idx < len(sentence) - 2 and cword.idx > 2 else []),
     Feature(34, lambda cword, pword, sentence:
         [(pword.pos, cword.pos, sentence[cword.idx - 2].word, sentence[cword.idx + 2].word)] if cword.idx < len(sentence) - 2 and cword.idx > 2 else []),
-
+    Feature(35, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos, sentence[cword.idx - 3].pos, sentence[cword.idx + 3].pos)] if cword.idx < len(sentence) - 3 and cword.idx > 3 else []),
+    Feature(36, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos, sentence[cword.idx - 3].word, sentence[cword.idx + 3].word)] if cword.idx < len(sentence) - 3 and cword.idx > 3 else []),
+    Feature(37, lambda cword, pword, sentence:
+        [(pword.word, cword.word)] if pword.idx > cword.idx else []),
+    Feature(38, lambda cword, pword, sentence:
+        [(pword.word, cword.word)] if pword.idx < cword.idx else []),
+    Feature(39, lambda cword, pword, sentence:
+        [(pword.word, cword.word)] if abs(pword.idx - cword.idx) < max_arc_length else []),
+    Feature(40, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos)] if abs(pword.idx - cword.idx) < 2 else []),
+    Feature(41, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos)] if abs(pword.idx - cword.idx) < 4 else []),
+    Feature(42, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos)] if abs(pword.idx - cword.idx) < 8 else []),
+    Feature(43, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos)] if abs(pword.idx - cword.idx) < 16 else []),
 ]
 
 

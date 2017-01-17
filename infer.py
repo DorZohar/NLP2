@@ -133,7 +133,7 @@ if __name__ == "__main__":
     parser.add_argument('-w', '--write_results', action='store_true')
     args = parser.parse_args()
 
-    families = [8,10,11,12,13,14,16,17,18,19,20,21,22,24,25,26]
+    families = [8,10,11,12,13,14,16,17,18,19,20,21,22,24,25,26,28,29,33,34,38,40,41]
     print('families: ' + ','.join([str(f) for f in families]))
     if args.infer:
         infer_only("test.labeled", families, args.plot_fails, args.iter, args.write_results)
