@@ -1,4 +1,6 @@
 import copy
+import numpy as np
+from multiprocessing import Pool
 
 def reverse(G):
     # reverse the direction of the edges in the graph for conevnience
@@ -141,7 +143,7 @@ def replace_weights(dst_G, src_G):
     return dst_G
 
 
-def mst(root, G):
+def mst(G):
     while True:
         possible_tree = keep_only_max_parents(G)
         cycle = list(find_cycle(possible_tree))
@@ -152,7 +154,31 @@ def mst(root, G):
             return possible_tree
 
 
-def plot(G):
+def graph_weight(G):
+    res = 0
+    for src in G:
+        for dst in G[src]:
+            res += G[src][dst]
+    return res
+
+
+def graphs_with_single_edge_from_root(G, root, node):
+    G_temp = copy.deepcopy(G)
+    G_temp[root] = {node: G_temp[root][node]}
+    return G_temp
+#
+# def mst(root, G):
+#     root_nodes = G[root]
+#     #p = Pool(56)
+#     Gs = map(lambda node: graphs_with_single_edge_from_root(G, root, node), root_nodes)
+#     trees = map(_mst, Gs)
+#     vals = map(graph_weight, trees)
+#     min_idx = np.argmin(vals)
+#
+#     return trees[min_idx]
+
+
+def plot(G, name='graph'):
     from graphviz import Digraph
 
     dot = Digraph()
@@ -162,7 +188,7 @@ def plot(G):
             dot.node(str(dst), str(dst))
             dot.edge(str(src), str(dst))
 
-    dot.render('graph', view=False)
+    dot.render(name, view=False)
 
 
 if __name__ == '__main__':
