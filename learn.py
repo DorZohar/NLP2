@@ -72,10 +72,9 @@ def keep_vector(vec, families, iter):
         f.write("vec = %s\n" % vec.tolist())
 
 
-def perceptron(file_path, iterations, families):
+def perceptron_inner(sentences, iterations, families):
     n = max(iterations) + 1
     start_time = time.time()
-    sentences = parse_input_file(file_path)
     graphs = list(map(lambda sentence: (sentence, sentence_to_features(sentence, families), sentence_to_graph(sentence, families)), \
                  sentences))
     vec = np.zeros(total_feature_num(families))
@@ -99,6 +98,11 @@ def perceptron(file_path, iterations, families):
             keep_vector(vec, families, i)
 
     return vecs_by_iter
+
+
+def perceptron(file_path, iterations, families):
+    sentences = parse_input_file(file_path)
+    return perceptron_inner(sentences, iterations, families)
 
 
 if __name__ == "__main__":

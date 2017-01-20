@@ -1,8 +1,10 @@
+from random import shuffle
+
 import numpy as np
 import time
 from chu_liu import mst
 from features import parse_input_file
-from learn import sentence_to_graph, get_weighted_graph, perceptron, vector_location
+from learn import sentence_to_graph, get_weighted_graph, perceptron, vector_location, perceptron_inner
 from CLE import plot, graphs_with_single_edge_from_root, graph_weight
 import argparse
 import imp
@@ -83,6 +85,7 @@ def infer_only(file_path, families, plot_fails=False, iter=-1, write_results=Fal
             for i, res in results.items():
                 file.write("%d,%f,%f\n" % (i, 100*res[0], res[1]))
 
+
 def mst_with_root(G):
 
     root = 0
@@ -94,9 +97,27 @@ def mst_with_root(G):
 
     return trees[min_idx]
 
-def infer(file_path, families, vector, plot_fails=False):
+
+def get_sentence_inference(sentence, mst):
+    for parent, children in mst.items():
+        for child in children.keys():
+            sentence[child].parent = parent
+
+    return sentence
+
+
+def output_inference_results(filename, sentences, msts):
+    inferred_sentences = map(lambda tup: get_sentence_inference(tup[0], tup[1]), zip(sentences, msts))
+    with open("%s.labeled" % filename, "w") as f:
+        for sentence in inferred_sentences:
+            for word in sentence:
+                f.write("%d\t%s\t_\t%s\t_\t_\t%d\t_\t_\t_\n" % (word.idx, word.word, word.pos, word.parent))
+            f.write("\n")
+
+
+
+def infer_inner(sentences, families, vector, plot_fails=False):
     start_time = time.time()
-    sentences = parse_input_file(file_path)
     word_num = sum([len(sentence) for sentence in sentences])
     graphs = map(lambda sentence: sentence_to_graph(sentence, families), sentences)
     selected_vec = np.asarray(vector)
@@ -109,7 +130,17 @@ def infer(file_path, families, vector, plot_fails=False):
     total_acc = sum(list(accuracies)) / float(word_num)
     print("accuracy: " + str(total_acc*100) + "%")
     print("time: " + str(time.time()-start_time) + " seconds")
-    return total_acc, time.time()-start_time
+    return msts, total_acc, time.time()-start_time
+
+
+def infer(file_path, families, vector, plot_fails=False):
+    sentences = parse_input_file(file_path)
+    msts, total_acc, t = infer_inner(sentences, families, vector, plot_fails)
+
+    if file_path.endswith(".unlabeled"):
+        output_inference_results(file_path, sentences, msts)
+
+    return total_acc, t
 
 
 def train_and_infer(file_name, families, iterations = [20, 50, 80, 100]):
@@ -125,17 +156,47 @@ def train_and_infer(file_name, families, iterations = [20, 50, 80, 100]):
             file.write("%d,%f,%f\n" % (i, 100*res[0], res[1]))
 
 
+def k_folds_validation(filename, num_folds, families, iteration):
+    sentences = parse_input_file(filename)
+    shuffle(sentences)
+
+    folds = []
+    for i in range(num_folds):
+        folds.append([])
+
+    idx = 0
+    for sen in sentences:
+        folds[idx % num_folds].append(sen)
+        idx += 1
+
+    total_precision = 0
+
+    for i in range(num_folds):
+        training_sentences = folds[:]
+        del training_sentences[i]
+        training_sentences = [item for sublist in training_sentences for item in sublist]
+        vecs = perceptron_inner(training_sentences, [iteration], families)
+        precision = infer_inner(folds[i], families, vecs[iteration])
+        total_precision += precision
+        print("%d fold's accuracy: %f" % (i, precision))
+
+    print("Average accuracy: %f" % (total_precision / num_folds))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--infer', action='store_true')
+    parser.add_argument('-v', '--validate', action='store_true')
     parser.add_argument('-p', '--plot_fails', action='store_true')
     parser.add_argument('-it', '--iter', default=-1, type=int)
     parser.add_argument('-w', '--write_results', action='store_true')
     args = parser.parse_args()
 
-    families = [8,10,11,12,13,14,16,17,18,19,20,21,22,24,25,26,28,29,33,34,38,40,41]
+    families = [8,10,11,12,13,14,16,17,18,19,20] #,21,22,24,25,26,28,29,33,34,38,40,41]
     print('families: ' + ','.join([str(f) for f in families]))
     if args.infer:
-        infer_only("test.labeled", families, args.plot_fails, args.iter, args.write_results)
+        infer_only("comp.unlabeled", families, args.plot_fails, args.iter, args.write_results)
+    elif args.validate:
+        k_folds_validation("train.labeled", 3, families, 5)
     else:
         train_and_infer("train.labeled", families)
