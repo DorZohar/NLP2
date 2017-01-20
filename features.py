@@ -123,9 +123,11 @@ feature_families = [
     Feature(43, lambda cword, pword, sentence:
         [(pword.pos, cword.pos)] if abs(pword.idx - cword.idx) < 16 else []),
     Feature(44, lambda cword, pword, sentence:
-    [(pword.pos, cword.pos, sentence[pword.idx - 1].pos, sentence[cword.idx + 1].pos)] if pword.idx > 1 and cword.idx < len(sentence) - 1 else []),
+        [(pword.pos, cword.pos, sentence[pword.idx - 1].pos, sentence[cword.idx + 1].pos)] if pword.idx > 1 and cword.idx < len(sentence) - 1 else []),
     Feature(45, lambda cword, pword, sentence:
-    [(pword.pos, cword.pos, sentence[pword.idx + 1].pos, sentence[cword.idx - 1].pos)] if pword.idx < len(sentence) - 1 and cword.idx > 1 else []),
+        [(pword.pos, cword.pos, sentence[pword.idx + 1].pos, sentence[cword.idx - 1].pos)] if pword.idx < len(sentence) - 1 and cword.idx > 1 else []),
+    Feature(46, lambda cword, pword, sentence:
+        [(pword.pos, cword.pos, sentence[i].pos, sentence[i + 1].pos) for i in range(min(pword.idx, cword.idx)+1, max(pword.idx, cword.idx) - 1)]),
 
 ]
 
