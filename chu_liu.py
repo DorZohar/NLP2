@@ -140,7 +140,7 @@ def mst(root, G):
     for n in RG:
         if len(RG[n]) == 0:
             continue
-        minimum = sys.maxsize
+        minimum = float("inf")
         s, d = None, None
         for e in RG[n]:
             if RG[n][e] < minimum:

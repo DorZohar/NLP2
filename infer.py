@@ -91,7 +91,7 @@ def mst_with_root(G):
     root = 0
     root_nodes = G[root]
     Gs = map(lambda node: graphs_with_single_edge_from_root(G, root, node), root_nodes)
-    trees = map(lambda G: mst(root, G), Gs)
+    trees = list(map(lambda G: mst(root, G), Gs))
     vals = map(graph_weight, trees)
     min_idx = np.argmin(vals)
 
@@ -176,7 +176,7 @@ def k_folds_validation(filename, num_folds, families, iteration):
         del training_sentences[i]
         training_sentences = [item for sublist in training_sentences for item in sublist]
         vecs = perceptron_inner(training_sentences, [iteration], families)
-        precision = infer_inner(folds[i], families, vecs[iteration])
+        precision = infer_inner(folds[i], families, vecs[iteration])[1]
         total_precision += precision
         print("%d fold's accuracy: %f" % (i, precision))
 
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     parser.add_argument('-w', '--write_results', action='store_true')
     args = parser.parse_args()
 
-    families = [8,10,11,12,13,14,16,17,18,19,20] #,21,22,24,25,26,28,29,33,34,38,40,41]
+    families = [8,10,11,12,13,14,16,17,18,19,20, 21, 22, 24, 25, 26, 28, 29] #,21,22,24,25,26,28,29,33,34,38,40,41]
     print('families: ' + ','.join([str(f) for f in families]))
     if args.infer:
         infer_only("comp.unlabeled", families, args.plot_fails, args.iter, args.write_results)
