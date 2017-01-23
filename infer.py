@@ -110,7 +110,7 @@ def output_inference_results(filename, sentences, msts):
     inferred_sentences = map(lambda tup: get_sentence_inference(tup[0], tup[1]), zip(sentences, msts))
     with open("%s.labeled" % filename, "w") as f:
         for sentence in inferred_sentences:
-            for word in sentence:
+            for word in sentence.values():
                 f.write("%d\t%s\t_\t%s\t_\t_\t%d\t_\t_\t_\n" % (word.idx, word.word, word.pos, word.parent))
             f.write("\n")
 
@@ -122,7 +122,7 @@ def infer_inner(sentences, families, vector, plot_fails=False):
     graphs = map(lambda sentence: sentence_to_graph(sentence, families), sentences)
     selected_vec = np.asarray(vector)
     weighted_graphs = list(map(lambda graph: get_weighted_graph(graph, selected_vec), graphs))
-    msts = map(mst_with_root, weighted_graphs)
+    msts = list(map(mst_with_root, weighted_graphs))
     accuracies = map(get_inference_accuracy, zip(sentences, msts))
     if plot_fails:
         get_fails(sentences, msts, vector_location(families))
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     parser.add_argument('-w', '--write_results', action='store_true')
     args = parser.parse_args()
 
-    families = [8,10,11,12,13,14,16,17,18,19,20, 21, 22, 24, 25, 26, 28, 29] #,21,22,24,25,26,28,29,33,34,38,40,41]
+    families = [8,10,11,12,13,14,16,17,18,19,20, 21, 22, 23, 24, 25, 26] #,21,22,24,25,26,28,29,33,34,38,40,41]
     print('families: ' + ','.join([str(f) for f in families]))
     if args.infer:
         infer_only("comp.unlabeled", families, args.plot_fails, args.iter, args.write_results)

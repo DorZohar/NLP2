@@ -1,12 +1,16 @@
 from feature_families import family_indices
 
+
 class Word:
     def __init__(self, line):
         params = line.split('\t')
         self.idx = int(params[0])
         self.word = params[1]
         self.pos = params[3]
-        self.parent = int(params[6])
+        if params[6] == '_':
+            self.parent = 0
+        else:
+            self.parent = int(params[6])
         self.edge_type = params[7]
 
 
