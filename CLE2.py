@@ -1,4 +1,6 @@
+from copy import deepcopy
 from heapq import heappush, heappop, heapify
+from time import time
 
 import numpy as np
 
@@ -7,11 +9,11 @@ import numpy as np
 class vertices:
     def __init__(self, n, G):
         self.in_arr = {}
-        self.const = {i: 0.0 for i in range(n)}
+        self.const = {i: 0.0 for i in range(1, n)}
         self.prev = {}
         self.parent = {}
-        self.children = {i: [] for i in range(n)}
-        self.P = {i: [] for i in range(n)}
+        self.children = {i: [] for i in range(1, n)}
+        self.P = {i: [] for i in range(1, n)}
         for u, neighbors in G.items():
             for v, w in neighbors.items():
                 heappush(self.P[v], (w, (u, v)))
@@ -52,7 +54,9 @@ def weight(G, vert, u, v):
 
 def mst(r, G):
     n = len(G)
-    vert = vertices(n, G)
+    root_neighbors = G[0]
+    del G[0]
+    vert = vertices(n+1, G)
     a = 1 # np.random.choice(list(G.keys()))
     while vert.P[a]:
         w, (u, v) = heappop(vert.P[a])
@@ -77,22 +81,33 @@ def mst(r, G):
                 heapify(vert.P[c])
                 a = c
 
+    min_sum = float('inf')
 
-    R = []
-    R, vert = dismantle(vert, r, R)
-    while R:
-        c = R.pop()
-        u, v = vert.in_arr[c]
-        vert.in_arr[v] = (u, v)
-        R, vert = dismantle(vert, v, R)
+    for ne, we in root_neighbors.items():
+        R = []
+        temp_vert = deepcopy(vert)
+        R, temp_vert = dismantle(temp_vert, ne, R)
+        sum = we
+        while R:
+            c = R.pop()
+            u, v = temp_vert.in_arr[c]
+            temp_vert.in_arr[v] = (u, v)
+            R, temp_vert = dismantle(temp_vert, v, R)
 
-    new_G = {i: {} for i in  range(len(G))}
-    for u, (s, t) in vert.in_arr.items():
-        if u != r and u in G:
-            new_G[s][t] = 1
+        new_G = {i: {} for i in range(1, len(G) + 1)}
+        for u, (s, t) in temp_vert.in_arr.items():
+            if u != ne and u in G:
+                new_G[s][t] = G[s][t]
+                sum += G[s][t]
 
-    return new_G
+        if sum <= min_sum:
+            min_sum = sum
+            new_G[0] = {ne: we}
+            min_tree = new_G
+
+
+    return min_tree
 
 
 if __name__ == "__main__":
-    print(mst(0, {0: {1: 0.0, 2: 0, 3: 0}, 1: {0: 0, 2: 0, 3: 0}, 2: {0: 0, 1: 0, 3: 0}, 3: {0: 0, 1: 0, 2: 0}}))
+    print(mst(0, {0: {1: 0.0, 2: 0, 3: 0}, 1: {2: 0, 3: 0}, 2: {1: 0, 3: 0}, 3: {1: 0, 2: 0}}))
