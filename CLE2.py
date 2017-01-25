@@ -7,7 +7,7 @@ import numpy as np
 class vertices:
     def __init__(self, n, G):
         self.in_arr = {}
-        self.const = {i: 0 for i in range(n)}
+        self.const = {i: 0.0 for i in range(n)}
         self.prev = {}
         self.parent = {}
         self.children = {i: [] for i in range(n)}
@@ -17,7 +17,7 @@ class vertices:
                 heappush(self.P[v], (w, (u, v)))
 
     def add_vertex(self, v):
-        self.const[v] = 0
+        self.const[v] = 0.0
         self.children[v] = []
         self.P[v] = []
 
@@ -53,7 +53,7 @@ def weight(G, vert, u, v):
 def mst(r, G):
     n = len(G)
     vert = vertices(n, G)
-    a = 0 # np.random.choice(list(G.keys()))
+    a = 1 # np.random.choice(list(G.keys()))
     while vert.P[a]:
         w, (u, v) = heappop(vert.P[a])
         b = find(vert, u)
@@ -86,7 +86,7 @@ def mst(r, G):
         vert.in_arr[v] = (u, v)
         R, vert = dismantle(vert, v, R)
 
-    new_G = {i: {} for i in range(len(G))}
+    new_G = {i: {} for i in  range(len(G))}
     for u, (s, t) in vert.in_arr.items():
         if u != r and u in G:
             new_G[s][t] = 1
@@ -95,4 +95,4 @@ def mst(r, G):
 
 
 if __name__ == "__main__":
-    print(mst(0, {0: {1: 1, 2: 3, 3: 1}, 1: {0: 1, 2: 1, 3: 3}, 2: {0: 5, 1: 0, 3: 2}, 3: {0: 5, 1: 10, 2: 12}}))
+    print(mst(0, {0: {1: 0.0, 2: 0, 3: 0}, 1: {0: 0, 2: 0, 3: 0}, 2: {0: 0, 1: 0, 3: 0}, 3: {0: 0, 1: 0, 2: 0}}))
