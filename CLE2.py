@@ -14,12 +14,13 @@ class vertices:
         self.P = {i: [] for i in range(n)}
         for u, neighbors in G.items():
             for v, w in neighbors.items():
-                heappush(self.P[v], (-w, (u, v)))
+                heappush(self.P[v], (w, (u, v)))
 
     def add_vertex(self, v):
         self.const[v] = 0
         self.children[v] = []
         self.P[v] = []
+
 
 
 def find(vert, u):
@@ -28,13 +29,14 @@ def find(vert, u):
     return u
 
 
-def dismantle(vert, r, R):
-    while r in vert.parent:
-        r = vert.parent[r]
-        for v in vert.children[r]:
-            del vert.parent[v]
-            if vert.children[v]:
-                R.append(v)
+def dismantle(vert, u, R):
+    while u in vert.parent:
+        for v in vert.children[vert.parent[u]]:
+            if v != u:
+                del vert.parent[v]
+                if vert.children[v]:
+                    R.append(v)
+        u = vert.parent[u]
 
     return R, vert
 
@@ -51,7 +53,7 @@ def weight(G, vert, u, v):
 def mst(r, G):
     n = len(G)
     vert = vertices(n, G)
-    a = 0  # np.random.choice(list(G.keys()))
+    a = 0 # np.random.choice(list(G.keys()))
     while vert.P[a]:
         w, (u, v) = heappop(vert.P[a])
         b = find(vert, u)
@@ -64,14 +66,17 @@ def mst(r, G):
                 c = n
                 n += 1
                 vert.add_vertex(c)
-                while a not in vert.parent and a in vert.in_arr:
+                while a not in vert.parent:
                     vert.parent[a] = c
+                    vert.in_arr[c] = vert.in_arr[a]
                     s, t = vert.in_arr[a]
                     vert.const[a] = -weight(G, vert, s, t)
                     vert.children[c].append(a)
                     vert.P[c] += vert.P[a]
-                    heapify(vert.P[c])
                     a = vert.prev[a]
+                heapify(vert.P[c])
+                a = c
+
 
     R = []
     R, vert = dismantle(vert, r, R)
@@ -79,15 +84,15 @@ def mst(r, G):
         c = R.pop()
         u, v = vert.in_arr[c]
         vert.in_arr[v] = (u, v)
-        R, vert = dismantle(vert, r, R)
+        R, vert = dismantle(vert, v, R)
 
     new_G = {i: {} for i in range(len(G))}
     for u, (s, t) in vert.in_arr.items():
-        if u != r:
-            new_G[s][u] = G[s][u]
+        if u != r and u in G:
+            new_G[s][t] = 1
 
     return new_G
 
 
 if __name__ == "__main__":
-    print(mst(0, {0: {1: 1, 2: 2, 3: 1}, 1: {0: 1, 2: 1, 3: 1}, 2: {0: 5, 1: 0, 3: 2}, 3: {}}))
+    print(mst(0, {0: {1: 1, 2: 3, 3: 1}, 1: {0: 1, 2: 1, 3: 3}, 2: {0: 5, 1: 0, 3: 2}, 3: {0: 5, 1: 10, 2: 12}}))
