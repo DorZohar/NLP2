@@ -185,9 +185,11 @@ def total_feature_num(families):
     num = 0
     for family in families:
         num += len(feature_families[family].keys_dict)
+        print("family = " + str(family) + " features = " + str(len(feature_families[family].keys_dict)))
 
     return num
 
 
 if __name__ == "__main__":
     create_feature_indices('train.labeled')
+    #total_feature_num(range(46))

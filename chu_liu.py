@@ -132,7 +132,8 @@ def mst(root, G):
     for instance a wrapper in which vertices are URLs
     and a call to G[v] loads the web page and finds its links.
     """
-
+    root = 0
+    print("#")
     RG = _reverse(G)
     if root in RG:
         RG[root] = {}

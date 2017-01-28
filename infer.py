@@ -2,7 +2,7 @@ from random import shuffle
 
 import numpy as np
 import time
-from chu_liu import mst
+from CLE import mst
 from features import parse_input_file
 from learn import sentence_to_graph, get_weighted_graph, perceptron, vector_location, perceptron_inner
 from CLE import plot, graphs_with_single_edge_from_root, graph_weight
@@ -86,12 +86,17 @@ def infer_only(file_path, families, plot_fails=False, iter=-1, write_results=Fal
                 file.write("%d,%f,%f\n" % (i, 100*res[0], res[1]))
 
 
+count = 0
+p = Pool(52)
 def mst_with_root(G):
-
+    global count
+    global p
+    count += 1
+    print(count)
     root = 0
     root_nodes = G[root]
     Gs = map(lambda node: graphs_with_single_edge_from_root(G, root, node), root_nodes)
-    trees = list(map(lambda G: mst(root, G), Gs))
+    trees = list(p.map(mst, Gs))
     vals = map(graph_weight, trees)
     min_idx = np.argmin(vals)
 
@@ -186,16 +191,18 @@ def k_folds_validation(filename, num_folds, families, iteration):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--infer', action='store_true')
+    parser.add_argument('-t', '--test_file', default='"comp.unlabeled')
     parser.add_argument('-v', '--validate', action='store_true')
     parser.add_argument('-p', '--plot_fails', action='store_true')
     parser.add_argument('-it', '--iter', default=-1, type=int)
     parser.add_argument('-w', '--write_results', action='store_true')
     args = parser.parse_args()
-
-    families = [8,10,11,12,13,14,16,17,18,19,20, 21, 22, 23, 24, 25, 26] #,21,22,24,25,26,28,29,33,34,38,40,41]
+  
+    #families = [1,2,3,4,5,6,8,10,13]
+    families = [8,10,11,12,13,14,16,17,18,19,20,21,22,24,25,26,28,29,33,34,38,40,41,46]
     print('families: ' + ','.join([str(f) for f in families]))
     if args.infer:
-        infer_only("comp.unlabeled", families, args.plot_fails, args.iter, args.write_results)
+        infer_only(args.test_file, families, args.plot_fails, args.iter, args.write_results)
     elif args.validate:
         k_folds_validation("train.labeled", 3, families, 5)
     else:
